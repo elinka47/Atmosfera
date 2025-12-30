@@ -1,0 +1,14 @@
+{
+  "config.atmosfera.resource_pack_warning": "サウンドイベントが登録されていません。内蔵またはカスタムの Atmosfera リソースパックを有効にしてください",
+  "config.category.atmosfera.general": "一般",
+  "config.category.atmosfera.volumes": "音量",
+  "config.category.atmosfera.subtitles": "字幕",
+  "config.subcategory.atmosfera.ambient_sound": "環境音",
+  "config.subcategory.atmosfera.music": "音楽",
+  "config.value.atmosfera.sound_tip.@Tooltip": "0%に設定すると無効になります",
+  "config.value.atmosfera.enable_custom_music": "カスタム音楽を有効化",
+  "config.value.atmosfera.custom_music_weight_scale": "カスタム音楽の再生優先度倍率",
+  "config.value.atmosfera.custom_music_weight_scale_explanation": "「重み」？「倍率」？",
+  "config.value.atmosfera.custom_music_weight_scale_explanation.@Tooltip": "「重み」とは、音楽が再生される確率を指します。\n通常、すべての音楽は同じ重みを持っています。\n「カスタム音楽の再生優先度倍率」は、\nカスタム音楽の重みを増やし、\nバニラの音楽より再生されやすくします。\nなお、すべての音楽がどこでも再生できるわけではなく、\n通常はカスタム音楽よりバニラ音楽のほうが多く存在します。\n一般的には、バニラ対カスタムの比率は約 27 対 3 です",
+  "config.value.atmosfera.enable_custom_music.@Tooltip": "Atmosferaのリソースパックに含まれる音楽を使用するかどうかを設定します"
+}
