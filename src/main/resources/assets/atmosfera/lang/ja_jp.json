@@ -1,4 +1,5 @@
 {
+  "modmenu.descriptionTranslation.atmosfera": "カスタマイズ可能な環境音を追加する音響システム",
   "config.atmosfera.resource_pack_warning": "サウンドイベントが登録されていません。内蔵またはカスタムの Atmosfera リソースパックを有効にしてください",
   "config.category.atmosfera.general": "一般",
   "config.category.atmosfera.volumes": "音量",
