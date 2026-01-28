@@ -1,8 +1,6 @@
 package dev.hephaestus.atmosfera.world.context;
 
 import dev.hephaestus.atmosfera.mixin.BossBarHudAccessor;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ClientBossBar;
@@ -11,20 +9,17 @@ import net.minecraft.tag.TagKey;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
-@Environment(EnvType.CLIENT)
 public class Sphere extends AbstractEnvironmentContext {
     final Hemisphere upperHemisphere;
     final Hemisphere lowerHemisphere;
 
-    public Sphere(Size size, ClientPlayerEntity player) {
-        super(player);
+    public Sphere(Size size) {
         this.upperHemisphere = new Hemisphere(ContextUtil.OFFSETS[Shape.UPPER_HEMISPHERE.ordinal()][size.ordinal()], this);
         this.lowerHemisphere = new Hemisphere(ContextUtil.OFFSETS[Shape.LOWER_HEMISPHERE.ordinal()][size.ordinal()], this);
         this.bossBars = new HashSet<>();
@@ -60,9 +55,9 @@ public class Sphere extends AbstractEnvironmentContext {
         return (upperHemisphere.getSkyVisibility() + lowerHemisphere.getSkyVisibility()) / 2F;
     }
 
-    public void update() {
-        World world = getPlayer().world;
-        BlockPos pos = getPlayer().getBlockPos();
+    public void update(ClientPlayerEntity player) {
+        var world = player.world;
+        var pos = player.getBlockPos();
 
         if (world.isChunkLoaded(pos.getX() >> 4, pos.getZ() << 4)) {
             BlockPos.Mutable mut = new BlockPos.Mutable().set(pos);
@@ -85,13 +80,17 @@ public class Sphere extends AbstractEnvironmentContext {
             }
 
             elevation = pos.getY();
-            isDay = world.isDay();
-            isRainy = world.isRaining();
-            isStormy = world.isThundering();
-            vehicle = getPlayer().getVehicle();
 
-            ContextUtil.EXECUTOR.execute(() -> upperHemisphere.update(pos.up()));
-            ContextUtil.EXECUTOR.execute(() -> lowerHemisphere.update(pos.down()));
+            // count day to sunset as "day". "night" is an hour shorter this way, which is fine
+            long timeOfDay = world.getLevelProperties().getTimeOfDay() % 24000;
+            isDay = 0 <= timeOfDay && timeOfDay < 13000;
+
+            isRainy = world.getLevelProperties().isRaining();
+            isStormy = world.isThundering();
+            vehicle = player.getVehicle();
+
+            ContextUtil.EXECUTOR.execute(() -> upperHemisphere.update(world, pos.up()));
+            ContextUtil.EXECUTOR.execute(() -> lowerHemisphere.update(world, pos.down()));
         }
     }
 

@@ -126,13 +126,14 @@ Parameters:
 Types:
 
 - `"is_daytime"`  
-  Outputs 1 if it is day, else 0.
+  Outputs 1 if the current time is between 0 and 13000, else 0.  
+  This corresponds to the time between players/villagers waking up and the `/time set night` time, roughly were mobs are starting to spawn.
 
 - `"is_rainy"`  
   Outputs 1 if it rains, else 0.
 
 - `"is_stormy"`  
-  Outputs 1 if it storms, else 0.
+  Outputs 1 if it is thundering, else 0.  
 
 <details><summary>Examples</summary>
 
@@ -150,6 +151,21 @@ Types:
 }
 ```
 "Play only at night."
+
+```
+{
+  "type": "is_daytime"
+},
+{
+  "type": "is_rainy",
+  "value": false
+},
+{
+  "type": "is_stormy",
+  "value": false
+}
+```
+"Play only when the sun shines."
 </details>
 
 #### Bounded Conditions
@@ -237,17 +253,14 @@ Parameters:
 
 Input: The percentage of matching biomes in the environment
 
-#### Type: "dimension_effects"
+#### Type: "dimension" ("dimension_effects" before 2.5.0)
 
 Parameters:
 
-- `"id"`: id of dimension effect  
-  In vanilla this is one of `"minecraft:overworld"`, `"minecraft:the_nether"`, or `"minecraft:the_end"`
+- `"id"`: id of dimension type  
+  In vanilla this is one of `"minecraft:overworld"`, `"minecraft:the_nether"`, `"minecraft:the_end"`, or `"minecraft:overworld_caves"`
 
-Outputs 1 if the current dimension effects match the given `id`, otherwise 0.
-
-Dimension effects refer to the look of the sky box, fog, and colors thereof.  
-Checking for dimension effects is not quite the same as a dimension check, as other (modded) dimensions might use the same dimension effects.
+Outputs 1 if the current dimension type match the given `id`, otherwise 0.
 
 #### Type: "riding"
 

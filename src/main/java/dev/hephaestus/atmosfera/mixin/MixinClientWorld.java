@@ -7,23 +7,14 @@ import dev.hephaestus.atmosfera.world.context.EnvironmentContext;
 import dev.hephaestus.atmosfera.world.context.EnvironmentContext.Size;
 import dev.hephaestus.atmosfera.world.context.Sphere;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.EnumMap;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
+import java.util.Objects;
 
 @Mixin(ClientWorld.class)
 public class MixinClientWorld implements ClientWorldDuck {
@@ -33,12 +24,12 @@ public class MixinClientWorld implements ClientWorldDuck {
     private int atmosfera$updateTimer = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void initializeSoundHandler(ClientPlayNetworkHandler netHandler, ClientWorld.Properties properties, RegistryKey<World> registryRef, RegistryEntry<DimensionType> registryEntry, int loadDistance, int simulationDistance, Supplier<Profiler> profiler, WorldRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci) {
+    private void initializeSoundHandler(CallbackInfo ci) {
         atmosfera$soundHandler = new AtmosphericSoundHandler((ClientWorld) (Object) this);
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
-    private void tickSoundHandler(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+    private void tickSoundHandler(CallbackInfo ci) {
         atmosfera$soundHandler.tick();
     }
 
@@ -60,18 +51,18 @@ public class MixinClientWorld implements ClientWorldDuck {
     @Override
     public void atmosfera$updateEnvironmentContext() {
         if (!atmosfera$initialized) {
-            ClientPlayerEntity player = MinecraftClient.getInstance().player;
             atmosfera$environmentContexts = new EnumMap<>(Size.class);
-            atmosfera$environmentContexts.put(Size.SMALL,  new Sphere(Size.SMALL,  player));
-            atmosfera$environmentContexts.put(Size.MEDIUM, new Sphere(Size.MEDIUM, player));
-            atmosfera$environmentContexts.put(Size.LARGE,  new Sphere(Size.LARGE,  player));
+            atmosfera$environmentContexts.put(Size.SMALL,  new Sphere(Size.SMALL));
+            atmosfera$environmentContexts.put(Size.MEDIUM, new Sphere(Size.MEDIUM));
+            atmosfera$environmentContexts.put(Size.LARGE,  new Sphere(Size.LARGE));
             atmosfera$initialized = true;
         }
 
         if (--atmosfera$updateTimer <= 0 && ContextUtil.EXECUTOR.getQueue().isEmpty()) {
-            atmosfera$environmentContexts.get(Size.SMALL ).update();
-            atmosfera$environmentContexts.get(Size.MEDIUM).update();
-            atmosfera$environmentContexts.get(Size.LARGE ).update();
+            var player = Objects.requireNonNull(MinecraftClient.getInstance().player);
+            atmosfera$environmentContexts.get(Size.SMALL ).update(player);
+            atmosfera$environmentContexts.get(Size.MEDIUM).update(player);
+            atmosfera$environmentContexts.get(Size.LARGE ).update(player);
             atmosfera$updateTimer = 20;
         }
     }

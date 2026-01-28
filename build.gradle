@@ -12,7 +12,22 @@ base {
     archivesName = project.archives_base_name
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/atmosfera.classtweaker")
+}
+
 repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     maven {
         name = 'ModMenu'
