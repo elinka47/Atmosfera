@@ -9,6 +9,7 @@
       "type": "percent_biome",
       "min": 0.1,
       "biomes": [
+        "minecraft:snowy_plains",
         "minecraft:snowy_tundra",
         "byg:lush_tundra"
       ]
@@ -23,11 +24,18 @@
     },
     {
       "type": "sky_visibility",
-      "min": 0.2
+      "range": [
+        0,
+        0.5
+      ]
     },
     {
       "type": "is_daytime",
       "value": true
+    },
+    {
+      "type": "is_submerged",
+      "value": false
     }
   ]
 }

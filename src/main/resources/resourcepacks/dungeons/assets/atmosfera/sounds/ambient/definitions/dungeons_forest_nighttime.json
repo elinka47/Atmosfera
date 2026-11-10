@@ -209,7 +209,10 @@
     },
     {
       "type": "sky_visibility",
-      "min": 0.2
+      "range": [
+        0,
+        0.5
+      ]
     },
     {
       "type": "is_daytime",
@@ -221,6 +224,10 @@
     },
     {
       "type": "is_stormy",
+      "value": false
+    },
+    {
+      "type": "is_submerged",
       "value": false
     }
   ]

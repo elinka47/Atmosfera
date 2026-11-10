@@ -1,3 +1,60 @@
+## 2.7.2
+
+- update Traditional Chinese (zh_tw) translation, thanks to StarsShine11904!
+
+## 2.7.1
+
+- port to 26.2
+
+## 2.7.0
+
+Small adjustments with large implications!
+
+- [1.19+] fix biome tag data not resetting  
+  previously entering and leaving a biome would not reset the biome tag percentage, meaning sounds from that biome could still play. This bug has existed since 2.0.0 for 1.19.
+- redefine `sky_visibility`: Instead of calculating the percentage of blocks with direct sight of the sky, calculate the average sky light (as a number between 0 and 1).  
+  This is to address an issue where sounds could stop completely inside dense forests. `sky_visibility` is often used to distinguish between overground and underground and since leaf blocks lower sky light by at least 1, everything below a leaf block was treated the same as being underground in that sense.
+  note: the new `sky_visibility` is generally much higher in value and the Dungeons resource pack has been adjusted accordingly
+- most `"max"`/`"min"`s in the Dungeons resource pack have been turned into `"range"`s so the volume scales smoothly instead of sounds stopping abruptly
+- the sound events `dungeons_forest_rainy`, `dungeons_forest_snowy_daytime`, and `dungeons_forest_snowy_nighttime` have been split up into "howls" variants for consistency too
+- fix tooltips for "howls" variants
+- [1.18 - 1.19] fix mod requiring `fabric-api` instead of `fabric` and hence not being able to load the game (regression of 2.6.0)
+
+## 2.6.1
+
+- add Russian (ru_ru) translation, thanks to itsrec0very!
+
+## 2.6.0
+
+This is a lot.
+
+- `max`/`min` bounded conditions have been changed to return 1 instead of the original value (like they were originally intended to).  
+  this partially fixes cave sounds not playing at all
+- cave sounds don't require `cave_air` anymore (as it is almost non-existent in modern versions) and rely on `altitude` instead  
+  this fully fixes cave sounds not playing at all
+- add back `is_submerged` boolean condition (lost some 5 years ago) which checks if the player is submerged in water or lava
+- all current sounds are now blocked when the player is submerged
+- add optional `sound_alias` to sound definitions, which essentially groups together sounds so they won't play when another sound with the same id or alias plays
+- owl hooting sounds are now aliased to the original nighttime sounds they came from (meaning a lot less hooting)
+- owls now only hoot on clear weather
+- the order sounds are considered in is now shuffled, so certain sounds won't consistently 'win' over other sounds with the same or similar conditions (this also means less hooting)
+- cave speleothems sounds now play with pointed dripstone nearby
+- cave speleothems volume has been lowered
+- many wind sounds have been lowered in volume and most howling sounds were separated for the config (though it's not possible to completely separate them)
+- `dungeons_wind` ("Wind blows" which plays when almost completely surrounded with air) now requires more air around the player
+- optimize checking for already playing sounds
+- music is now streamed (should reduce audio lag)
+- [1.21+] fix closed captions not showing
+- [26.1+] fix `is_day` using the wrong clock (it now uses the dimension's default clock)
+
+## 2.5.7
+
+- [1.20.1, 1.21.1] revert use of classtweaker; fixes Sinytra Connector compatibility
+
+## 2.5.6
+
+- port to 26.1
+
 ## 2.5.5
 
 - fix a threading issue caused by Raise Sound Limit Simplified

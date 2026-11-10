@@ -35,7 +35,10 @@ To be able to use sounds and music, they first have to be registered using the v
   },
   "dungeons_swamp_soggy_cave": {
     "sounds": [
-      "atmosfera:music/swamp/swamp_soggier_cave_ost"
+      {
+        "name": "atmosfera:music/swamp/swamp_soggier_cave_ost",
+        "stream": true
+      }
     ]
   }
 }
@@ -45,7 +48,8 @@ This means `dungeons_wind` is an ambient sound that plays one of
 `assets/atmosfera/sounds/ambient/wind/wind_rumble_loop_1_1.ogg`
 `assets/atmosfera/sounds/ambient/wind/wind_rumble_loop_1_2.ogg`  
 and uses a subtitle with translation key `subtitle.atmosfera.dungeons_wind` (defined in `en_us.json` or any other language code).  
-Similarly `dungeons_swamp_soggy_cave` is music that plays  `assets/atmosfera/sounds/music/swamp/swamp_soggier_cave_ost.ogg`
+Similarly `dungeons_swamp_soggy_cave` is music that plays `assets/atmosfera/sounds/music/swamp/swamp_soggier_cave_ost.ogg`.  
+(The `"stream": true` means the sound file is streamed instead of loaded in its entirety, which is recommended for music but probably not a great idea for sound effects since there can only be a very limited number streamed sounds at once.)
 
 For more details about `sounds.json`, see the [Minecraft wiki](https://minecraft.wiki/w/Sounds.json).
 
@@ -61,7 +65,7 @@ Here's an example of what that might look like:
   "default_volume": 100,
   "default_subtitle": true,
   "shape": "sphere",
-  "size": "small",
+  "size": "large",
   "modifiers": [
     {
       "type": "percent_block",
@@ -69,8 +73,8 @@ Here's an example of what that might look like:
         "minecraft:air"
       ],
       "range": [
-        0.6,
-        0.7
+        0.7,
+        1
       ]
     },
     {
@@ -80,7 +84,7 @@ Here's an example of what that might look like:
   ]
 }
 ```
-This reads roughly as "the `atmosfera:dungeons_wind` sound can play when 50% of a small sphere around the player is in skylight and at least 60% of it is air, maxing the volume when it reaches 70%."
+This reads roughly as "the `atmosfera:dungeons_wind` sound can play when the average sky light (as a number between 0 and 1) in a large sphere around the player is at least 0.5 and at least 70% of it is air, maxing the volume when it reaches 100%."
 
 `"sound"` is the sound to be played, defined in `sounds.json`.
 
@@ -95,6 +99,20 @@ This reads roughly as "the `atmosfera:dungeons_wind` sound can play when 50% of 
 
 The name of a definition file doesn't really matter as long as it's unique. It is good practice to use the same name as the sound it plays, e.g. the example above should be called `dungeons_wind.json`.
 
+There's another one:
+```
+{
+  "sound": "atmosfera:dungeons_forest_nighttime_owl",
+  "sound_alias": "atmosfera:dungeons_forest_nighttime",
+  ...
+```
+
+By default, only one instance of a sound with a given `"sound"` id can play.  
+When there are multiple definitions with the same or similar conditions that means they would all play at the same time.  
+To prevent this from happening, you can give your definition a "pretend sound id", `"sound_alias"`, which essentially groups the sounds together.  
+In this example, if `"dungeons_forest_nighttime"` is playing, `"dungeons_forest_nighttime_owl"` cannot and vice versa.
+
+
 ### Modifiers (aka Conditions)
 
 Modifiers look for example like this:
@@ -104,7 +122,7 @@ Modifiers look for example like this:
   "min": 0.5
 }
 ```
-This reads as "at least 50% of blocks in the environment are in skylight".
+This reads as "the average sky light in the environment (as a number between 0 and 1) is at least 0.5".
 
 Modifiers have a `"type"` and may accept different parameters.
 
@@ -173,50 +191,50 @@ Types:
 Parameters:
 
 - `"min"`: number (optional)  
-  When the input is smaller than `"min"` return 0, else return the input.  
-
 - `"max"`: number (optional)  
-  When the input is larger than `"max"` return 0, else return the input.
+
+When `min < x ≤ max` output 1, else 0. One or both can be defined.  
+Cannot be used together with `"range"`.
 
 <details><summary>Details</summary>
 
+Input to output graphs:
 ```
-          / <- max
-         /
-        /
-min -> /
-
-0 ______   ____
-       |   |
-     min   max
+min and max defined:     only min defined:     only max defined:
+                                                                
+1      ______            1      _________      1 ___________   
+            |                                              |   
+0 _____     |____        0 _____               0           |____
+      |     |                  |                           |
+    min     max              min                           max
 ```
-(Graph if both are used, which they rarely are.)
 
-Since `"min"` and `"max"` return the input as-is if in bounds, this will effectively also limit the output (volume). This does not apply to music, since music ignores volume.
+A `"min"` of 0 on a `"percent_block"` would mean "there is at least one such block".
+
 </details>
 
 - `"range": [lower, upper]"`: numbers (optional)  
   Output linearly grows from 0 to 1 on the interval from `[lower, upper]`.  
-  Applies after `"min"` and `"max"`.
+  `lower` and `upper` can be swapped for growth from 1 to 0.  
 
 <details><summary>Details</summary>
 
 ```
-          ____ 1
-         /|
-        / |
-       /  |
-      /   |
-0 ___/    |
-     |    |
- lower    upper
+lower < upper:       upper < lower:
+
+          ____ 1     1 ____
+         /|               |\
+        / |               | \
+       /  |               |  \
+      /   |               |   \
+0 ___/    |               |    \____ 0
+     |    |               |     |        
+ lower    upper       upper     lower    
 ```
 
-When the input is smaller than `lower` return 0.  
-When the input is larger than `upper` return 1.  
-Else output `(input - lower) / (upper - lower)`.  
+Calculates `(input - lower) / (upper - lower)` and clamps it between 0 and 1.  
  
-Works similar to `"min"`, except it gives control over the output (volume). It is useful for rare events which would otherwise have a low volume, e.g. `"range": [0.1, 0.3]"` would max the volume when the input reaches 0.3.
+Works similar to a `"min"` or a `"max"`, except it gives control over the output (volume). It is useful for rare events which would otherwise have a low volume, e.g. `"range": [0.1, 0.3]"` would max the volume when the input reaches 0.3.
 
 </details>
 
@@ -229,7 +247,8 @@ Types:
   Input: The y-value of the player.
 
 - `"sky_visibility"`  
-  Input: The percentage of blocks that are in skylight as a number between 0 and 1
+  Input: The average sky light in the environment as a number between 0 and 1.  
+  (More precisely it is the average of the per-block sky light divided by 15.)
 
 #### Type: "percent_block"
 
